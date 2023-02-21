@@ -8,7 +8,7 @@
                         id="login"
                         type="text"
                         class="p-3 bg-gray-100 rounded-l-md outline-transparent w-full"
-                        v-model="query"
+                        v-model.trim="query"
                         placeholder="Введите запрос..."
                     />
                 </div>
@@ -47,8 +47,10 @@
 export default {
     data() {
         return {
+            loading: false,
             query: "",
             videos: [],
+            nextPage: "",
         }
     },
     computed: {
@@ -58,11 +60,19 @@ export default {
     },
     methods: {
         search() {
-            fetch(`/api/search?query=${this.query}`)
+            if (this.loading || !this.query) {
+                return;
+            }
+
+            fetch(`/api/search?query=${this.query}&nextPage=${this.nextPage}`)
             .then((response) => response.json())
-            .then((videos) => {
-                this.videos = videos;
-            })
+            .then((data) => {
+                this.nextPage = data.nextPage;
+                this.videos.push(...data.videos);
+                this.loading = false;
+            });
+
+            this.loading = true;
         },
         convertTime(totalSeconds) {
             let time = "";
@@ -78,5 +88,13 @@ export default {
             return time.substring(0, time.length - 1);
         }
     },
+    mounted() {
+        window.onscroll = () => {
+            let bottomOfWindow = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight;
+            if (bottomOfWindow) {
+                this.search();
+            }
+        };
+    }
 };
 </script>
