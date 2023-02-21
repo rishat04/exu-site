@@ -31,21 +31,16 @@ class SearchController extends Controller
         $data = [];
 
         $time = $times[0];
-
             
         [$response, $token] = $this->search($query, $time, $token);
         $data = array_merge($data, $response);
 
-        
-
         return response()->json($data);
-        
-        
     }
 
     private function search($query, $time, $token) {
         $response = [];
-        
+
         $raw_data = '{"context":{"client":{"clientName":"WEB","clientVersion":"2.9999099"}}' . ($token ? ',"continuation":"' . $token . '"' : '') . ',"query":"' . $query . '"' . ($time ? ',"params":"' . $time . '"' : '') . '}';
 
         $opts = [
@@ -59,9 +54,9 @@ class SearchController extends Controller
         $ui_key = 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8';
 
         $json = $this->get_json('https://www.youtube.com/youtubei/v1/search?key=' . $ui_key, $opts);
-        
+
         $items = ($token ? $json['onResponseReceivedCommands'][0]['appendContinuationItemsAction']['continuationItems'] : $json['contents']['twoColumnSearchResultsRenderer']['primaryContents']['sectionListRenderer']['contents'])[0]['itemSectionRenderer']['contents'];
-        
+
         $nextPageToken = $json['contents']['twoColumnSearchResultsRenderer']['primaryContents']['sectionListRenderer']['contents'][1]['continuationItemRenderer']['continuationEndpoint']['continuationCommand']['token'] ?? null ;
         $nextPageToken = $nextPageToken ?? ($json['onResponseReceivedCommands'][0]['appendContinuationItemsAction']['continuationItems'][1]['continuationItemRenderer']['continuationEndpoint']['continuationCommand']['token'] ?? null);
 
@@ -73,7 +68,7 @@ class SearchController extends Controller
             //     dd($json);
             //     dd($item);
             // }
-                
+
             $response[] = [
                 'channelId' => $item['ownerText']['runs'][0]['navigationEndpoint']['browseEndpoint']['browseId'],
                 'videoId' => $item['videoId'],
