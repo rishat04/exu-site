@@ -1,0 +1,129 @@
+version: '3'
+
+networks:
+  laravel:
+
+services:
+  site:
+    build:
+      context: ./dockerfiles
+      dockerfile: nginx.dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    ports:
+      - '8008:80'
+      #- '${VITE_PORT:-5173}:5173'
+    volumes:
+      - ./:/var/www/html:delegated
+    depends_on:
+      - php
+      - redis
+      - db
+      - mailhog
+    networks:
+      - laravel
+
+  db:
+    image: mariadb:10.7.4
+    restart: always
+    volumes:
+      - ./db:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_DATABASE: '${DB_DATABASE}'
+      MYSQL_USER: '${DB_USERNAME}'
+      MYSQL_PASSWORD: '${DB_PASSWORD}'
+    ports:
+      - '3311:3306'
+    networks:
+      - laravel
+
+  php:
+    build:
+      context: ./dockerfiles
+      dockerfile: php.dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+    user: laravel
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    volumes:
+      - ./:/var/www/html:delegated
+    networks:
+      - laravel
+
+  redis:
+    build:
+      context: ./dockerfiles
+      dockerfile: redis.dockerfile
+    restart: unless-stopped
+    sysctls:
+      - net.core.somaxconn=4096
+    ports:
+      - '6308:6379'
+    networks:
+      - laravel
+
+
+  composer:
+    build:
+      context: ./dockerfiles
+      dockerfile: composer.dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+    user: laravel
+    volumes:
+      - ./:/var/www/html
+    working_dir: /var/www/html
+    depends_on:
+      - php
+    networks:
+      - laravel
+
+  node:
+    build:
+      context: ./dockerfiles
+      dockerfile: node.dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+    user: node
+    volumes:
+      - ./:/var/www/html
+    ports:
+      - '3000:3000'
+      - '3001:3001'
+      - '${VITE_PORT}:5173'
+    working_dir: /var/www/html
+    networks:
+      - laravel
+
+  artisan:
+    build:
+      context: ./dockerfiles
+      dockerfile: artisan.dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+    user: laravel
+    volumes:
+      - ./:/var/www/html:delegated
+    depends_on:
+      - db
+    working_dir: /var/www/html
+    entrypoint: [ 'php', '/var/www/html/artisan' ]
+    networks:
+      - laravel
+
+  mailhog:
+    image: 'mailhog/mailhog:latest'
+    ports:
+      - '1025:1025'
+      - '8025:8025'
+    networks:
+      - laravel
