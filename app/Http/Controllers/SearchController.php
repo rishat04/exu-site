@@ -8,7 +8,7 @@ class SearchController extends Controller
 {
     public function __invoke(Request $request) {
         $query = $request->input('query');
-        $url = 'https://www.youtube.com/results?search_query=' . $query;
+        $token = $request->input("nextPage");
 
         // $times = [
         //     '',             #nothing
@@ -31,28 +31,11 @@ class SearchController extends Controller
         $data = [];
 
         $time = $times[0];
-
-        // foreach($times as $time) {
-            $continuationToken = '';
-            $is_first = true;
-            $count = 0;
-            while($continuationToken or $is_first) {
-                [$response, $continuationToken] = $this->search($query, $time, $continuationToken);
-                // dump($response);
-                $data = array_merge($data, $response);
-                $is_first = false;
-//                 $count++;
-                if (++$count === 1) {
-                    break;
-                }
-            }
-        // }
-
-
+            
+        [$response, $token] = $this->search($query, $time, $token);
+        $data = array_merge($data, $response);
 
         return response()->json($data);
-
-
     }
 
     private function search($query, $time, $token) {
