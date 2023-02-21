@@ -1,63 +1,21 @@
 <template>
-  <form class="form" @submit.prevent="submitForm">
-    <div class="form__inner">
-      <div class="form__row form__row--column">
-        <h1 class="form__title">Авторизация</h1>
+  <h1 class="font-semibold text-3xl">Авторизация</h1>
+  <form class="max-w-md mx-auto mt-16" @submit.prevent="submitForm">
+    <div class="flex flex-col space-y-7">
+      <div class="flex flex-col">
+        <label for="login" class="text-gray-300 mb-1">Логин</label>
+        <input id="login" type="email" class="p-3 bg-gray-100 rounded-md outline-transparent" v-model="login"/>
       </div>
-      <div class="form__row form__row--column">
-        <label for="login" class="form__label">Логин</label>
-        <input id="login" type="email" class="form__input" v-model="login"/>
+      <div class="flex flex-col">
+        <label for="password" class="text-gray-300 mb-1">Пароль</label>
+        <input id="password" type="password" class="p-3 bg-gray-100 rounded-md outline-transparent" v-model="password"/>
       </div>
-      <div class="form__row form__row--column">
-        <label for="password" class="form__label">Пароль</label>
-        <input id="password" type="password" class="form__input" v-model="password"/>
-      </div>
-      <div class="form__row">
-        <button class="form__button">Отправить</button>
+      <div class="flex">
+        <button class="bg-green-800/50 px-5 py-2 rounded-md text-white">Отправить</button>
       </div>
     </div>
   </form>
 </template>
-
-<style lang="scss" scoped>
-.form {
-  max-width: 400px;
-  margin: 20px auto 0;
-  &__row {
-    display: flex;
-    &--column {
-      flex-direction: column;
-    }
-    & + & {
-      margin-top: 15px;
-    }
-  }
-  &__title {
-    font-size: 2.4rem;
-  }
-  &__label {
-    color: #424242;
-    margin-bottom: 10px;
-    font-size: 1.6rem;
-  }
-  &__input {
-    padding: 10px;
-    outline: none;
-    border-radius: 6px;
-    border: none;
-    background-color: #f5f5f5;
-  }
-  &__button {
-    padding: 1.2rem 2rem;
-    font-size: 1.6rem;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    background-color: #84b89b;
-    color: #fff;
-  }
-}
-</style>
 
 <script>
 export default {

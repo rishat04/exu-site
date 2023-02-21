@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="max-w-screen-xl w-full m-auto">
     <Navbar />
     <div class="main-layout">
       <slot />
