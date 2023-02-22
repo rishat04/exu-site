@@ -43,29 +43,27 @@ class SearchController extends Controller
 
     }
 
-    private function filter($videos, $filterParams) {
+    private function filter($videos, $filterParams)
+    {
         $response = [];
 
-        foreach ($filterParams as $key => $value) {
-            $filter = $filterParams[$key];
-            foreach ($videos as $video) {
+        foreach ($videos as $video)
+        {
+            $accepted = true;
+            foreach ($filterParams as $key => $value)
+            {
 
-                if ($filter['from'] and $filter['to']) {
-                    if ($filter['from'] <= $video[$key] and $filter['to'] >= $video[$key]) {
-                        $response[] = $video;
-                    }
-                    continue;
+                $filter = $filterParams[$key];
+
+                if ($filter['from'] and $video[$key] <= $filter['from'] or $filter['to'] and $video[$key] >= $filter['to'])
+                {
+                    $accepted = false;
                 }
 
-                if ($filter['from'] and $video[$key] >= $filter['from']) $response[] = $video;
-                if ($filter['to'] and $video[$key] <= $filter['to']) $response[] = $video;
-
-                // $check = (bool)($filter['from'] and $video[$key] >= $filter['from'] || $filter['to'] and $video[$key] <= $filter['to']);
-
-                // if ($check) {
-                //     $response[] = $video;
-                // }
+                if (!$accepted) break;
             }
+
+            if ($accepted) $response[] = $video;
         }
 
         return $response;
