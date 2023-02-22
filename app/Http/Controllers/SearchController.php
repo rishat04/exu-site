@@ -31,11 +31,10 @@ class SearchController extends Controller
         $data = [];
 
         $time = $times[0];
-
         [$response, $token] = $this->search($query, $time, $token);
         $data = array_merge($data, $response);
 
-        return response()->json(['videos' => $data, 'nextPage' => $token]);
+        return response()->json(['videos' => $data, 'nextPage' => $token);
     }
 
     private function search($query, $time, $token) {
