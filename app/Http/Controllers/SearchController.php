@@ -9,15 +9,20 @@ class SearchController extends Controller
     public function __invoke(Request $request) {
         $query = $request->input('query');
         $token = $request->input("nextPage");
-
-        // $times = [
-        //     '',             #nothing
-        //     '&sp=EgQIARAB', #last hour
-        //     '&sp=EgQIAhAB', #today
-        //     '&sp=EgQIAxAB', #last week
-        //     '&sp=EgQIBBAB', #last month
-        //     '&sp=EgQIBRAB', #last year
-        // ];
+        $filterParams = [
+            'views' => [
+                'from' => (int) $request->input('viewsFrom'),
+                'to'   => (int) $request->input('viewsTo')
+            ],
+            'date' => [
+                'from' => (int) $request->input('dateFrom'),
+                'to'   => (int) $request->input('dateTo'),
+            ],
+            'subs' => [
+                'from' => (int) $request->input('subsFrom'),
+                'to'   => (int) $request->input('subsTo')
+            ]
+        ];
 
         $times = [
             '',             #nothing
@@ -28,13 +33,42 @@ class SearchController extends Controller
             'EgQIBRAB', #last year
         ];
 
-        $data = [];
-
         $time = $times[0];
         [$response, $token] = $this->search($query, $time, $token);
-        $data = array_merge($data, $response);
 
-        return response()->json(['videos' => $data, 'nextPage' => $token);
+        $filtered = $this->filter($response, $filterParams);
+
+        return response()->json(['videos' => $filtered, 'nextPage' => $token]);
+
+
+    }
+
+    private function filter($videos, $filterParams) {
+        $response = [];
+
+        foreach ($filterParams as $key => $value) {
+            $filter = $filterParams[$key];
+            foreach ($videos as $video) {
+
+                if ($filter['from'] and $filter['to']) {
+                    if ($filter['from'] <= $video[$key] and $filter['to'] >= $video[$key]) {
+                        $response[] = $video;
+                    }
+                    continue;
+                }
+
+                if ($filter['from'] and $video[$key] >= $filter['from']) $response[] = $video;
+                if ($filter['to'] and $video[$key] <= $filter['to']) $response[] = $video;
+
+                // $check = (bool)($filter['from'] and $video[$key] >= $filter['from'] || $filter['to'] and $video[$key] <= $filter['to']);
+
+                // if ($check) {
+                //     $response[] = $video;
+                // }
+            }
+        }
+
+        return $response;
     }
 
     private function search($query, $time, $token) {
