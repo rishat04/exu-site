@@ -34,36 +34,35 @@ class SearchController extends Controller
         ];
 
         $time = $times[0];
-
         [$response, $token] = $this->search($query, $time, $token);
 
-        $filtered = $this->filter($response, $filterParams);  
+        $filtered = $this->filter($response, $filterParams);
 
         return response()->json(['videos' => $filtered, 'nextPage' => $token]);
-        
-        
+
+
     }
 
     private function filter($videos, $filterParams)
     {
         $response = [];
-  
-        foreach ($videos as $video) 
-        { 
+
+        foreach ($videos as $video)
+        {
             $accepted = true;
-            foreach ($filterParams as $key => $value) 
+            foreach ($filterParams as $key => $value)
             {
 
                 $filter = $filterParams[$key];
 
-                if ($filter['from'] and $video[$key] <= $filter['from'] or $filter['to'] and $video[$key] >= $filter['to']) 
+                if ($filter['from'] and $video[$key] <= $filter['from'] or $filter['to'] and $video[$key] >= $filter['to'])
                 {
                     $accepted = false;
                 }
 
                 if (!$accepted) break;
-                
             }
+
             if ($accepted) $response[] = $video;
         }
 
