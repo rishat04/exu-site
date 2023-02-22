@@ -41,6 +41,11 @@
             </div>
         </div>
     </div>
+    <div
+        class="fixed w-20 h-20 rounded-full bg-gray-100 bottom-6 right-6 flex items-center justify-center drop-shadow-xl"
+    >
+        <span class="text-xl">{{ fetchedVideos.length }}</span>
+    </div>
 </template>
 
 <script>
