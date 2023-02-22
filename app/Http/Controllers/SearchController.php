@@ -56,15 +56,6 @@ class SearchController extends Controller
 
                 $filter = $filterParams[$key];
 
-                // if ($filter['from'] and $filter['to']) 
-                // {
-                //     if ($filter['from'] >= $video[$key] and $filter['to'] <= $video[$key]) 
-                //     {
-                //         $accepted = false;
-                //     }
-                //     break;
-                // }
-
                 if ($filter['from'] and $video[$key] <= $filter['from'] or $filter['to'] and $video[$key] >= $filter['to']) 
                 {
                     $accepted = false;
