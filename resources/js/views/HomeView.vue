@@ -1,7 +1,7 @@
 <template>
     <h1 class="font-semibold text-3xl">Поиск</h1>
-    <div class="flex flex-col items-center my-10">
-        <form class="max-w-md w-full mx-auto mt-16" @submit.prevent="search">
+    <!--   Search form     -->
+    <form class="max-w-md w-full mx-auto mt-16" @submit.prevent="search">
             <div class="flex">
                 <div class="flex flex-1">
                     <input
@@ -17,7 +17,12 @@
                 </div>
             </div>
         </form>
-        <div class="flex flex-col w-full space-y-5 w-full mt-16">
+        <!--    Search filters    -->
+    <div class="flex mt-16">
+        <div class="w-1/4 p-4">
+            <Filters @changed="updateFilterParams" />
+        </div>
+        <div class="flex flex-col w-full p-4 space-y-5 w-full">
             <div
                 class="flex space-x-4"
                 v-for="video in fetchedVideos"
@@ -36,11 +41,19 @@
                         >{{ video.channelTitle }}</a>
                         <span>{{ video.viewText }}</span>
                         <span>Duration: {{ convertTime(video.duration) }}</span>
+                        <span>Published date: {{ video.publishedDate }}</span>
+                        <div class="space-x-2">
+                            <span
+                                class="py-1 px-3 rounded-md cursor-default bg-gray-100"
+                                v-for="keyword in video.keywords"
+                            >{{ keyword }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+        <!--    Search results    -->
     <div
         class="fixed w-20 h-20 rounded-full bg-gray-100 bottom-6 right-6 flex items-center justify-center drop-shadow-xl"
     >
@@ -49,13 +62,17 @@
 </template>
 
 <script>
+import Filters from "@/components/Filters.vue";
+
 export default {
+    components: { Filters },
     data() {
         return {
             loading: false,
             query: "",
             videos: [],
             nextPage: "",
+            filterParams: "",
         }
     },
     computed: {
@@ -69,7 +86,7 @@ export default {
                 return;
             }
 
-            fetch(`/api/search?query=${this.query}&nextPage=${this.nextPage}`)
+            fetch(`/api/search?query=${this.query}&nextPage=${this.nextPage}&${this.filterParams}`)
             .then((response) => response.json())
             .then((data) => {
                 this.nextPage = data.nextPage;
@@ -78,6 +95,10 @@ export default {
             });
 
             this.loading = true;
+        },
+        updateFilterParams(filterParams) {
+            console.log(filterParams)
+            this.filterParams = filterParams;
         },
         convertTime(totalSeconds) {
             let time = "";
