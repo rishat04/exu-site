@@ -108,7 +108,7 @@ class SearchController extends Controller
             'duration' => $json->videoDetails->lengthSeconds,
             'keywords' => $json->videoDetails->keywords ?? null,
             'channelId' => $json->videoDetails->channelId,
-            'channelName' => $json->microformat->playerMicroformatRenderer->ownerChannelName,
+            'channelTitle' => $json->microformat->playerMicroformatRenderer->ownerChannelName,
             'thumbnail' => $json->videoDetails->thumbnail->thumbnails[3]->url,
             'views' => $json->videoDetails->viewCount,
             'author' => $json->videoDetails->author,
