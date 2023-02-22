@@ -39,9 +39,21 @@ class SearchController extends Controller
 
         $filtered = $this->filter($response, $filterParams);  
 
-        return response()->json(['videos' => $filtered, 'nextPage' => $token]);
+        $response = $this->getAdvancedDetails($response);
+
+        $filtered = $this->filter($response, $filterParams);
+
+        return response()->json(['videos' => $filtered, 'nextPage' => $token]);       
         
-        
+    }
+
+    private function getAdvancedDetails($videos) {
+        $response = [];
+        foreach($videos as $video) {
+            $response[] = $this->getVideoDetails($video['videoId']);
+        }
+
+        return $response;
     }
 
     private function filter($videos, $filterParams)
@@ -66,6 +78,43 @@ class SearchController extends Controller
             }
             if ($accepted) $response[] = $video;
         }
+
+        return $response;
+    }
+
+    private function getVideoDetails($videoId) {
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, 'https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, '{  "context": {    "client": {      "hl": "en",      "clientName": "WEB",      "clientVersion": "2.20210721.00.00",      "clientFormFactor": "UNKNOWN_FORM_FACTOR",   "clientScreen": "WATCH",      "mainAppWebInfo": {        "graftUrl": "/watch?v='.$videoId.'",           }    },    "user": {      "lockedSafetyMode": false    },    "request": {      "useSsl": true,      "internalExperimentFlags": [],      "consistencyTokenJars": []    }  },  "videoId": "'.$videoId.'",  "playbackContext": {    "contentPlaybackContext": {        "vis": 0,      "splay": false,      "autoCaptionsDefaultOn": false,      "autonavState": "STATE_NONE",      "html5Preference": "HTML5_PREF_WANTS",      "lactMilliseconds": "-1"    }  },  "racyCheckOk": false,  "contentCheckOk": false}');
+        curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+    
+        $headers = array();
+        $headers[] = 'Content-Type: application/json';
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    
+        $result = curl_exec($ch);
+        if (curl_errno($ch)) {
+            echo 'Error:' . curl_error($ch);
+        }
+        curl_close($ch);
+
+        $json = json_decode($result);
+
+        $response = [
+            'title' => $json->videoDetails->title,
+            'videoId' => $json->videoDetails->videoId,
+            'duration' => $json->videoDetails->lengthSeconds,
+            'keywords' => $json->videoDetails->keywords ?? null,
+            'channelId' => $json->videoDetails->channelId,
+            'channelName' => $json->microformat->playerMicroformatRenderer->ownerChannelName,
+            'thumbnail' => $json->videoDetails->thumbnail->thumbnails[3]->url,
+            'views' => $json->videoDetails->viewCount,
+            'author' => $json->videoDetails->author,
+            'date' => $json->microformat->playerMicroformatRenderer->uploadDate,
+        ];
 
         return $response;
     }
@@ -96,11 +145,6 @@ class SearchController extends Controller
             if (!$item = $item['videoRenderer'] ?? null or !$views = $item['viewCountText']['simpleText'] ?? null)
                 continue;
 
-            // if (!($item['lengthText'] ?? false)) {
-            //     dd($json);
-            //     dd($item);
-            // }
-
             $response[] = [
                 'channelId' => $item['ownerText']['runs'][0]['navigationEndpoint']['browseEndpoint']['browseId'],
                 'videoId' => $item['videoId'],
@@ -117,30 +161,7 @@ class SearchController extends Controller
     }
 
     private function get_json($url, $opts) {
-        $GOOGLE_ABUSE_EXEMPTION = '';
-        if ($GOOGLE_ABUSE_EXEMPTION !== '') {
-            $cookieToAdd = 'GOOGLE_ABUSE_EXEMPTION=' . $GOOGLE_ABUSE_EXEMPTION;
-            if (array_key_exists('http', $opts)) {
-                $http = $opts['http'];
-                if (array_key_exists('header', $http)) {
-                    $headers = $http['header'];
-                    foreach ($headers as $headerIndex => $header) {
-                        if (str_starts_with($header, 'Cookie: ')) {
-                            $opts['http']['header'][$headerIndex] = "$header; $cookieToAdd";
-                            break;
-                        }
-                    }
-                }
-            } else {
-                $opts = [
-                    'http' => [
-                        'header' => [
-                            "Cookie: $cookieToAdd"
-                        ]
-                    ]
-                ];
-            }
-        }
+
         $context = stream_context_create($opts);
         $result = file_get_contents($url, false, $context);
 
