@@ -29,7 +29,7 @@
                 :key="video.videoId"
             >
                 <img
-                    :src="video.thumbnails"
+                    :src="video.thumbnail"
                     class="h-25 rounded-lg max-w-[350px]"
                 >
                 <div class="flex flex-col">
@@ -39,9 +39,9 @@
                             :href="`https://www.youtube.com/channel/${video.channelId}`"
                             target="_blank"
                         >{{ video.channelTitle }}</a>
-                        <span>{{ video.viewText }}</span>
+                        <span>{{ video.views }}</span>
                         <span>Duration: {{ convertTime(video.duration) }}</span>
-                        <span>Published date: {{ video.publishedDate }}</span>
+                        <span>Published date: {{ video.date }}</span>
                         <div class="space-x-2">
                             <span
                                 class="py-1 px-3 rounded-md cursor-default bg-gray-100"
