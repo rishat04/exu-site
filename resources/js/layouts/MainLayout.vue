@@ -4,6 +4,10 @@
     <div class="main-layout">
       <slot />
     </div>
+    <form >
+      <input type="text" v-model="id">
+      <button v-on:click="trim">Trim</button>
+    </form>
   </div>
 </template>
 
@@ -18,6 +22,26 @@
 <script>
 import Navbar from "../components/Navbar.vue";
 export default {
-  components: { Navbar }
+  components: { Navbar },
+  data: {
+    id: ''
+  },
+  methods: {
+    trim: function(event) {
+      fetch('/api/trim', {
+        method: 'post',
+        data: { 
+          v: this.id,
+          s: '0',
+          d: '0',
+          q: '720'        
+        }
+      }).then(response => {
+        return response.json();
+      }).then(json => {
+        console.log(json);
+      })
+    }
+  }
 }
 </script>
