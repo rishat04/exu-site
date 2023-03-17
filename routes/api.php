@@ -2,7 +2,8 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SearchController;
-use App\Http\Controllers\TrimmerController;
+use App\Http\Controllers\VideoFormatsController;
+use App\Http\Controllers\VideoTrimController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -24,9 +25,8 @@ Route::controller(AuthController::class)
     Route::post('login', 'login')->name('login');
 });
 
-// Route::post('/auth/register', [AuthController::class, 'register']);
-// Route::post('/auth/login', [AuthController::class, 'login']);
-
 Route::get('/search', SearchController::class);
 
-Route::post('/trim', [TrimmerController::class, 'trim']);
+Route::get('/trim', VideoTrimController::class);
+// Route::get('/details', VideoDetailsController::class);
+Route::get('/formats', VideoFormatsController::class);
