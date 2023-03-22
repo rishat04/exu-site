@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\VideoDownloadController;
 use App\Http\Controllers\VideoFormatsController;
 use App\Http\Controllers\VideoTrimController;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +28,7 @@ Route::controller(AuthController::class)
 
 Route::get('/search', SearchController::class);
 
-Route::get('/trim', VideoTrimController::class);
+Route::post('/trim', VideoTrimController::class);
 // Route::get('/details', VideoDetailsController::class);
 Route::get('/formats', VideoFormatsController::class);
+Route::get('/download', VideoDownloadController::class);

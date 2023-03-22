@@ -12,13 +12,16 @@ class VideoHelper {
         $elements = [];
         $quaityExists = [];
 
+        $duration = (int) $response['videoDetails']['lengthSeconds'];
+
         foreach ($response['streamingData']['formats'] as $video) {
             $type = explode(';', $video['mimeType'])[0];
             $videoFormat = explode('/', $type)[1];
             $elements['video']['withAudio'][] = [
                 'url' => $video['url'],
                 'format' => $videoFormat,
-                'quality' => $video['qualityLabel']
+                'quality' => $video['qualityLabel'],
+                'size' => round($duration * $video['bitrate'] / 8 / 1024 / 1024, 1),
             ];
         }
         foreach($response['streamingData']['adaptiveFormats'] as $video) {
@@ -37,11 +40,12 @@ class VideoHelper {
             $elements['video']['withoutAudio'][] = [
                 'url' => $video['url'],
                 'format' => $videoFormat,
-                'quality' => $video['qualityLabel']
+                'quality' => $video['qualityLabel'],
+                'size' => round($video['contentLength'] / 1024 / 1024, 1),
             ];
         }
         
-        return $elements;
+        return self::sortByQuality($elements);
     }
 
     public static function getDetails($videoId)
@@ -51,4 +55,21 @@ class VideoHelper {
         return $response->json();
     }
 
+    private static function sortByQuality($elements) 
+    {
+        $elements = $elements['video'];
+        usort($elements['withAudio'], function($a, $b) {
+            $a = $a['quality'];
+            $b = $b['quality'];
+            return explode('p', $a)[0] < explode('p', $b)[0];
+        });
+
+        usort($elements['withoutAudio'], function($a, $b) {
+            $a = $a['quality'];
+            $b = $b['quality'];
+            return explode('p', $a)[0] < explode('p', $b)[0];
+        });
+
+        return ['video' => $elements];
+    }
 }
