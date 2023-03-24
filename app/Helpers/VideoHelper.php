@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Helpers;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use GuzzleHttp\Client;
 
@@ -55,6 +56,16 @@ class VideoHelper {
         return $response->json();
     }
 
+    public static function makeHash(Request $request) {
+        $start      = $request->input('s');
+        $duration   = $request->input('d');
+        $name       = $request->input('n');
+        $name = str_replace('/', '', $name);
+        $name = str_replace('\\', '', $name);
+
+        return base64_encode($name . '_' . $start . $duration);
+    }
+
     private static function sortByQuality($elements) 
     {
         $elements = $elements['video'];
@@ -72,4 +83,6 @@ class VideoHelper {
 
         return ['video' => $elements];
     }
+
+
 }

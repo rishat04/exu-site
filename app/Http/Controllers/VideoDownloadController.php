@@ -24,7 +24,6 @@ class VideoDownloadController extends Controller
             'Content-Type' => 'video/mp4'
         ];
 
-
         return Storage::download($hash_name, $name, $headers);
     }
 }
